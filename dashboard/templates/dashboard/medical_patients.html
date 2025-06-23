@@ -1,0 +1,17 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+    <div class="container mt-4">
+        <h2>My Patients</h2>
+        <ul class="list-group">
+            {% for patient in patients %}
+                <li class="list-group-item">
+                    <a href="{% url 'medical_patient_detail' patient.id %}">
+                        {{ patient.user.first_name }} {{ patient.user.last_name }}
+                    </a>
+                </li>
+            {% empty %}
+                <li class="list-group-item">No patients assigned.</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

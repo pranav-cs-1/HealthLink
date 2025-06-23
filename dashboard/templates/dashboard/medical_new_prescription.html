@@ -1,0 +1,85 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .generate-btn {
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+    </style>
+
+    <div class="container">
+        <h2>Create New Prescription</h2>
+        <div class="form-container">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- Instead of rendering the whole form automatically, render fields manually -->
+                <div class="form-group">
+                    <label for="id_patient">Patient</label>
+                    {{ form.patient }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_medication_name">Medication Name</label>
+                    <!-- Ensure you have an id attribute on the input -->
+                    {{ form.medication_name }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_description">Description</label>
+                    {{ form.description }}
+                    <!-- Button to trigger Gemini API generation -->
+                    <button id="generate-description-btn" class="btn btn-secondary btn-sm generate-btn">Generate Description from Gemini</button>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create Prescription</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Wait until the DOM is loaded
+        document.addEventListener("DOMContentLoaded", function(){
+            const generateBtn = document.getElementById('generate-description-btn');
+            generateBtn.addEventListener('click', function(event) {
+                event.preventDefault(); // prevent form submission
+
+                // Get the medication name value from the form. Adjust id if needed.
+                const medicationInput = document.getElementById('id_medication_name');
+                const descriptionInput = document.getElementById('id_description');
+
+                if(!medicationInput.value.trim()){
+                    alert("Please enter a medication name first.");
+                    return;
+                }
+
+                // Call our new endpoint using fetch
+                const url = "{% url 'generate_drug_description' %}?medication=" + encodeURIComponent(medicationInput.value);
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.description){
+                            descriptionInput.value = data.description;
+                        } else {
+                            alert("Could not generate description. Please try again.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert("An error occurred. Please try again.");
+                    });
+            });
+        });
+    </script>
+
+{% endblock %}

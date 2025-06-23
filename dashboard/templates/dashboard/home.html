@@ -1,0 +1,47 @@
+{% extends 'dashboard/base.html' %}
+
+{% block extra_styles %}
+    <style>
+        .jumbotron {
+            background: #fff;
+            padding: 2rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .jumbotron h1.display-4 {
+            font-weight: 600;
+            font-size: 2.5rem;
+        }
+        .jumbotron p.lead {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        .jumbotron hr {
+            border-top: 2px solid #eee;
+            width: 50%;
+            margin: 1.5rem auto;
+        }
+        .jumbotron a.btn {
+            margin-right: 0.5rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome to Hospital Management</h1>
+        <p class="lead">Manage patient data, appointments, and more.</p>
+        <hr class="my-4">
+        <p>Please select your login type:</p>
+        <a class="btn btn-primary btn-lg" href="{% url 'patient_login' %}" role="button">
+            Login as Patient
+        </a>
+        <a class="btn btn-info btn-lg" href="{% url 'medical_login' %}" role="button">
+            Login as Medical Professional
+        </a>
+        <a class="btn btn-secondary btn-lg" href="{% url 'admin_login' %}" role="button">
+            Login as Administrator
+        </a>
+    </div>
+{% endblock %}

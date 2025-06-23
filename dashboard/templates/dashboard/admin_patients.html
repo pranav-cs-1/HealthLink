@@ -1,0 +1,49 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+    <div class="container mt-4">
+
+        <div class="d-flex justify-content-between mb-3">
+            <h2>Patient Management</h2>
+            <a href="{% url 'admin_new_patient' %}" class="btn btn-success">Add New Patient</a>
+        </div>
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if patients %}
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for patient in patients %}
+                    <tr>
+                        <td>{{ patient.user.first_name }} {{ patient.user.last_name }}</td>
+                        <td>{{ patient.user.email }}</td>
+                        <td>{{ patient.phone_number }}</td>
+                        <td>
+                            <a href="{% url 'admin_view_patient' patient.id %}" class="btn btn-sm btn-primary">View</a>
+                            <a href="{% url 'admin_edit_patient' patient.id %}" class="btn btn-sm btn-secondary">Edit</a>
+                            <a href="{% url 'admin_delete_patient' patient.id %}" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No patients found.</p>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4>Create New Medical Report</h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Debug information -->
+                        {% if debug_info %}
+                            <div class="alert alert-info">
+                                <p>Debug Information:</p>
+                                <ul>
+                                    <li>Number of appointments with this doctor: {{ debug_info.appointments_count }}</li>
+                                    <li>Number of patients with appointments: {{ debug_info.patients_count }}</li>
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <div class="form-group">
+                                <label for="{{ form.patient.id_for_label }}">Patient:</label>
+                                {{ form.patient }}
+                                {% if form.patient.help_text %}
+                                    <small class="form-text text-muted">{{ form.patient.help_text }}</small>
+                                {% endif %}
+                                {% if form.patient.errors %}
+                                    <div class="alert alert-danger">
+                                        {{ form.patient.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.title.id_for_label }}">Report Title:</label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="alert alert-danger">
+                                        {{ form.title.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.summary.id_for_label }}">Report Summary:</label>
+                                {{ form.summary }}
+                                {% if form.summary.errors %}
+                                    <div class="alert alert-danger">
+                                        {{ form.summary.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Create Report</button>
+                            <a href="{% url 'medical_dashboard' %}" class="btn btn-secondary">Cancel</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

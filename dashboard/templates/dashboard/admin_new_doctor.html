@@ -1,0 +1,49 @@
+{% extends 'dashboard/base.html' %}
+{% block extra_styles %}
+    <style>
+        .auth-card {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .back-arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ccc;
+            color: #000;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+        .back-arrow:hover {
+            background-color: #bbb;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="auth-card">
+                    <!-- Back arrow: Link to the admin doctor management page -->
+                    <div class="mb-3">
+                        <a href="{% url 'admin_doctors' %}" class="back-arrow">←</a>
+                    </div>
+                    <h2 class="mb-4 text-center">Add New Doctor</h2>
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

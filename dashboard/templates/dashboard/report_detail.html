@@ -1,0 +1,50 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card custom-card">
+                <div class="card-header custom-card-header bg-info text-white">
+                    <i class="fas fa-file-medical-alt mr-2"></i>{{ report.title }}
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted">Report Details</h6>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Date:</strong> {{ report.date|date:"F d, Y H:i" }}</p>
+                                <p><strong>Patient:</strong> {{ report.patient.user.first_name }} {{ report.patient.user.last_name }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Medical Professional:</strong> Dr. {{ report.medical_professional.user.first_name }} {{ report.medical_professional.user.last_name }}</p>
+                                <p><strong>Specialization:</strong> {{ report.medical_professional.specialization }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6 class="text-muted">Report Summary</h6>
+                        <hr>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                {{ report.summary|linebreaks }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer custom-card-footer text-right">
+                    {% if user.patient %}
+                        <a href="{% url 'patient_view_reports' %}" class="btn btn-secondary">Back to Reports</a>
+                    {% elif user.medicalprofessional %}
+                        <a href="{% url 'medical_view_reports' %}" class="btn btn-secondary">Back to Reports</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

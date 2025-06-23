@@ -1,0 +1,114 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Doctor Details</h2>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>{{ doctor.user.first_name }} {{ doctor.user.last_name }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Email:</strong> {{ doctor.user.email }}</p>
+                    <p><strong>Specialization:</strong> {{ doctor.specialization }}</p>
+                    <p><strong>Phone Number:</strong> {{ doctor.phone_number|default:"Not provided" }}</p>
+                </div>
+                <div class="col-md-6 text-right">
+                    <a href="{% url 'admin_edit_doctor' doctor.id %}" class="btn btn-primary">Edit</a>
+                    <a href="{% url 'admin_delete_doctor' doctor.id %}" class="btn btn-danger">Delete</a>
+                    <a href="{% url 'admin_doctors' %}" class="btn btn-secondary">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patients -->
+    <h3>Assigned Patients</h3>
+    {% if patients %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td>{{ patient.user.first_name }} {{ patient.user.last_name }}</td>
+                    <td>{{ patient.user.email }}</td>
+                    <td>{{ patient.phone_number|default:"N/A" }}</td>
+                    <td>
+                        <a href="{% url 'admin_view_patient' patient.id %}" class="btn btn-sm btn-info">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No patients assigned to this doctor.</p>
+    {% endif %}
+
+    <!-- Appointments -->
+    <h3>Appointments</h3>
+    {% if appointments %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Patient</th>
+                    <th>Reason</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr>
+                    <td>{{ appointment.appointment_date }}</td>
+                    <td>{{ appointment.patient.user.first_name }} {{ appointment.patient.user.last_name }}</td>
+                    <td>{{ appointment.reason }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No appointments found.</p>
+    {% endif %}
+
+    <!-- Reports -->
+    <h3>Medical Reports</h3>
+    {% if reports %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Patient</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                <tr>
+                    <td>{{ report.date }}</td>
+                    <td>{{ report.title }}</td>
+                    <td>
+                        {% if report.patient %}
+                            {{ report.patient.user.first_name }} {{ report.patient.user.last_name }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'report_detail' report.id %}" class="btn btn-sm btn-info">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No reports found.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'patient_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Prescriptions</li>
+                    </ol>
+                </nav>
+
+                <div class="card custom-card mb-4">
+                    <div class="card-header custom-card-header bg-info text-white">
+                        <i class="fas fa-pills mr-2"></i>All Prescriptions
+                    </div>
+                    <div class="card-body">
+                        {% if prescriptions %}
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Medication</th>
+                                    <th>Description</th>
+                                    <th>Prescribed By</th>
+                                    <th>Date</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for prescription in prescriptions %}
+                                    <tr>
+                                        <td><strong>{{ prescription.medication_name }}</strong></td>
+                                        <td>{{ prescription.description }}</td>
+                                        <td>Dr. {{ prescription.medical_professional.user.first_name }} {{ prescription.medical_professional.user.last_name }}</td>
+                                        <td>{{ prescription.created_at|date:"M d, Y" }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p>You don't have any prescriptions.</p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer custom-card-footer">
+                        <a href="{% url 'find_pharmacy' %}" class="btn btn-primary">Find Nearest Pharmacy</a>
+                        <a href="{% url 'patient_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

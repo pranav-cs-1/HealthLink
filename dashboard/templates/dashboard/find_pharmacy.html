@@ -1,0 +1,192 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'patient_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'patient_prescriptions' %}">Prescriptions</a></li>
+                        <li class="breadcrumb-item active">Find Pharmacy</li>
+                    </ol>
+                </nav>
+
+                <div class="card custom-card mb-4">
+                    <div class="card-header custom-card-header bg-primary text-white">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Find Nearest Pharmacy
+                    </div>
+                    <div class="card-body">
+                        <form id="pharmacy-search-form" method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="{{ form.address.id_for_label }}">Address:</label>
+                                {{ form.address }}
+                            </div>
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </form>
+
+                        {% if results %}
+                            <div class="mt-4">
+                                <h4>Results for: {{ results.address }}</h4>
+                                <div id="map" style="width: 100%; height: 400px; margin-top: 20px; border-radius: 8px;"></div>
+
+                                <h5 class="mt-3">Nearest Pharmacies:</h5>
+                                <div id="loading" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                    <p>Searching for nearby pharmacies...</p>
+                                </div>
+                                <ul id="pharmacy-list" class="list-group" style="display: none;"></ul>
+                                <div id="error-message" class="alert alert-danger mt-3" style="display: none;"></div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer custom-card-footer">
+                        <a href="{% url 'patient_prescriptions' %}" class="btn btn-secondary">Back to Prescriptions</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include Leaflet JS and CSS for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <script>
+        {% if results %}
+            var map;
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initialize the map
+                map = L.map('map').setView([0, 0], 2);
+
+                // Add OpenStreetMap tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                // Search for pharmacies
+                findNearbyPharmacies("{{ results.address }}");
+            });
+
+            function findNearbyPharmacies(address) {
+                // Declare these so they’re accessible later.
+                let centerLat, centerLon;
+
+                // First, geocode the address to get coordinates
+                const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`;
+
+                fetch(geocodeUrl, {
+                    headers: {
+                        'Accept-Language': 'en-US,en',
+                        'User-Agent': 'HealthcareApp/1.0'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            centerLat = parseFloat(data[0].lat);
+                            centerLon = parseFloat(data[0].lon);
+
+                            // Log the geocoded coordinates for debugging purposes
+                            console.log("Geocoded coordinates:", centerLat, centerLon);
+
+                            // Set map view to the located address
+                            map.setView([centerLat, centerLon], 13);
+
+                            // Add a marker for the searched address
+                            L.marker([centerLat, centerLon])
+                                .addTo(map)
+                                .bindPopup('<strong>Your location</strong>')
+                                .openPopup();
+
+                            // Increase the result limit to get more results from Nominatim
+                            // The viewbox is in order: left, top, right, bottom.
+                            const pharmacyUrl = `https://nominatim.openstreetmap.org/search?format=json&q=pharmacy&limit=50&viewbox=${centerLon-0.15},${centerLat+0.15},${centerLon+0.15},${centerLat-0.15}&bounded=1`;
+
+                            return fetch(pharmacyUrl, {
+                                headers: {
+                                    'Accept-Language': 'en-US,en',
+                                    'User-Agent': 'HealthcareApp/1.0'
+                                }
+                            });
+                        } else {
+                            throw new Error('Address not found');
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(pharmacies => {
+                        // Hide loading indicator
+                        document.getElementById('loading').style.display = 'none';
+
+                        // Process pharmacies and sort by computed distance
+                        const pharmacyList = document.getElementById('pharmacy-list');
+                        pharmacyList.style.display = 'block';
+                        pharmacyList.innerHTML = '';
+
+                        if (pharmacies.length > 0) {
+                            // Compute distance from the geocoded center for each pharmacy.
+                            // (Using the haversine formula.)
+                            pharmacies = pharmacies.map(pharmacy => {
+                                const pharmLat = parseFloat(pharmacy.lat);
+                                const pharmLon = parseFloat(pharmacy.lon);
+                                const R = 6371; // Earth radius in km
+                                const dLat = (pharmLat - centerLat) * Math.PI / 180;
+                                const dLon = (pharmLon - centerLon) * Math.PI / 180;
+                                const a = Math.sin(dLat / 2) ** 2 +
+                                    Math.cos(centerLat * Math.PI / 180) *
+                                    Math.cos(pharmLat * Math.PI / 180) *
+                                    Math.sin(dLon / 2) ** 2;
+                                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                                pharmacy.distance = R * c;
+                                return pharmacy;
+                            });
+
+                            // Sort the pharmacies by distance (nearest first)
+                            pharmacies.sort((a, b) => a.distance - b.distance);
+
+                            // Now create markers and list items in sorted order
+                            pharmacies.forEach((pharmacy, index) => {
+                                const pharmLat = parseFloat(pharmacy.lat);
+                                const pharmLon = parseFloat(pharmacy.lon);
+
+                                // Add a marker for each pharmacy
+                                L.marker([pharmLat, pharmLon])
+                                    .addTo(map)
+                                    .bindPopup(`<strong>${pharmacy.display_name.split(',')[0]}</strong><br>${pharmacy.display_name}`);
+
+                                // Create list item with pharmacy details and computed distance
+                                const li = document.createElement('li');
+                                li.className = 'list-group-item';
+                                li.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5>${pharmacy.display_name.split(',')[0]}</h5>
+                                <p class="mb-1">${pharmacy.display_name}</p>
+                                <small class="text-muted">Distance: ${pharmacy.distance.toFixed(2)} km</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" onclick="map.setView([${pharmLat}, ${pharmLon}], 16);">View on Map</button>
+                        </div>
+                    `;
+                                pharmacyList.appendChild(li);
+                            });
+                        } else {
+                            pharmacyList.innerHTML = '<li class="list-group-item">No pharmacies found nearby. Try a different address or search term.</li>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('loading').style.display = 'none';
+
+                        const errorMessage = document.getElementById('error-message');
+                        errorMessage.style.display = 'block';
+                        errorMessage.textContent = `Error finding nearby pharmacies: ${error.message}`;
+                    });
+            }
+
+        {% endif %}
+    </script>
+{% endblock %}

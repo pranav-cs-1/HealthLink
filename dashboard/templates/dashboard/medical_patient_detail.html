@@ -1,0 +1,41 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+    <div class="container mt-4">
+        <h2>Patient Details</h2>
+        <div class="card mb-3">
+            <div class="card-header">
+                {{ patient.user.first_name }} {{ patient.user.last_name }}
+            </div>
+            <div class="card-body">
+                <p><strong>Email:</strong> {{ patient.user.email }}</p>
+                <p><strong>Date of Birth:</strong> {{ patient.date_of_birth }}</p>
+                <p><strong>Phone:</strong> {{ patient.phone_number }}</p>
+                <p><strong>Address:</strong> {{ patient.address }}</p>
+            </div>
+        </div>
+
+        <h3>Reports</h3>
+        <ul class="list-group mb-3">
+            {% for report in reports %}
+                <li class="list-group-item">
+                    <a href="{% url 'report_detail' report.id %}">
+                        {{ report.title }} ({{ report.date|date:"M d, Y" }})
+                    </a>
+                </li>
+            {% empty %}
+                <li class="list-group-item">No reports available.</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Prescriptions</h3>
+        <ul class="list-group">
+            {% for prescription in prescriptions %}
+                <li class="list-group-item">
+                    {{ prescription.medication_name }} - {{ prescription.created_at|date:"M d, Y" }}
+                </li>
+            {% empty %}
+                <li class="list-group-item">No prescriptions available.</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

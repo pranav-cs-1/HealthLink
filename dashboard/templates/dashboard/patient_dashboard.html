@@ -1,0 +1,191 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+    <style>
+        /* Use system font stack for a modern feel */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+            Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            background: #f9f9f9; /* Light background */
+        }
+
+        /* Nav Tabs: remove heavy borders, add subtle rounding */
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 0;
+            color: #666;
+        }
+        .nav-tabs .nav-link.active {
+            border: none;
+            border-bottom: 3px solid #007bff;
+            font-weight: 500;
+            color: #007bff;
+        }
+
+        /* Cards: softer shadows, rounded corners, minimal borders */
+        .custom-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .custom-card-header {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .custom-card-footer {
+            border-top: none;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        .custom-card .list-group-item {
+            border: none;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* Sidebar Quick Links hover effect */
+        .list-group-item-action:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Make icons slightly larger for a modern feel */
+        .mr-2 {
+            margin-right: 0.5rem !important;
+            font-size: 1.25rem;
+        }
+
+        /* Slightly darker background for headers */
+        .custom-card-header.bg-light {
+            background-color: #eeeeee !important;
+        }
+    </style>
+
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <!-- Left column: main dashboard content -->
+            <div class="col-lg-9">
+                <!-- Top navigation tabs (optional) -->
+                <ul class="nav nav-tabs mb-3">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'patient_appointments' %}">Appointments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'patient_prescriptions' %}">Prescriptions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'find_pharmacy' %}">Find Pharmacy</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'patient_view_reports' %}">Reports</a>
+                    </li>
+                </ul>
+
+                <!-- Row with main cards -->
+                <div class="row">
+                    <!-- Upcoming Appointments Card -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card custom-card h-100">
+                            <div class="card-header custom-card-header bg-primary text-white">
+                                <i class="fas fa-calendar-check mr-2"></i>Upcoming Appointments
+                            </div>
+                            <div class="card-body">
+                                {% if upcoming_appointments %}
+                                    <ul class="list-group list-group-flush">
+                                        {% for appointment in upcoming_appointments %}
+                                            <li class="list-group-item">
+                                                <strong>
+                                                    {{ appointment.appointment_date|date:"M d, Y H:i" }}
+                                                </strong><br>
+                                                With: Dr. {{ appointment.medical_professional.user.first_name }}
+                                                {{ appointment.medical_professional.user.last_name }}<br>
+                                                Reason: {{ appointment.reason }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p>No upcoming appointments.</p>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer custom-card-footer text-right">
+                                <a href="{% url 'patient_appointments' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Example: Another card (placeholder) -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card custom-card h-100">
+                            <div class="card-header custom-card-header bg-info text-white">
+                                <i class="fas fa-pills mr-2"></i>Prescriptions
+                            </div>
+                            <div class="card-body">
+                                <!-- Updated prescription display to show description instead of dosage/instructions -->
+                                {% if prescriptions %}
+                                    <ul class="list-group list-group-flush">
+                                        {% for prescription in prescriptions %}
+                                            <li class="list-group-item">
+                                                <strong>{{ prescription.medication_name }}</strong><br>
+                                                Description: {{ prescription.description }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p>No current prescriptions.</p>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer custom-card-footer text-right">
+                                <a href="{% url 'patient_prescriptions' %}" class="btn btn-sm btn-outline-info">View All</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column: sidebar with quick links and notes -->
+            <div class="col-lg-3">
+                <!-- Quick Links -->
+                <div class="card custom-card mb-3">
+                    <div class="card-header custom-card-header bg-light">
+                        <strong>Quick Links</strong>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'patient_new_appointment' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-plus-circle text-success mr-2"></i>New Appointment
+                        </a>
+                        <a href="{% url 'patient_view_reports' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-file-medical-alt text-warning mr-2"></i>View Reports
+                        </a>
+                        <a href="{% url 'find_pharmacy' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-mortar-pestle text-info mr-2"></i>Find Pharmacy
+                        </a>
+                        <a href="{% url 'patient_billing' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-file-invoice-dollar text-primary mr-2"></i>Update Profile
+                        </a>
+                    </div>
+                </div>
+
+
+                <!-- Notes -->
+                <div class="card custom-card mb-3">
+                    <div class="card-header custom-card-header bg-light">
+                        <strong>Notes</strong>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            <strong>Support Center</strong><br>
+                            Need help? Contact our support team for assistance.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

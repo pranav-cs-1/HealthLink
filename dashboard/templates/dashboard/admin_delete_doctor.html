@@ -1,0 +1,28 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h3>Confirm Delete</h3>
+        </div>
+        <div class="card-body">
+            <p>Are you sure you want to delete the doctor <strong>{{ doctor.user.first_name }} {{ doctor.user.last_name }}</strong>?</p>
+            <p class="text-danger">
+                <strong>Warning:</strong> This action cannot be undone and will delete all records for this doctor including:
+                <ul>
+                    <li>Appointments</li>
+                    <li>Prescriptions</li>
+                    <li>Medical Reports</li>
+                </ul>
+                <strong>Note:</strong> Patient records will remain in the system but will no longer be associated with this doctor.
+            </p>
+            
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Yes, Delete Doctor</button>
+                <a href="{% url 'admin_doctors' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,225 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+    <!-- Optional: Custom CSS -->
+    <style>
+        /* Use system font stack for a modern feel */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+            Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            background: #f9f9f9; /* Light background for a softer look */
+        }
+
+        /* Nav Tabs: remove heavy borders, add subtle rounding */
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 0;
+            color: #666;
+        }
+        .nav-tabs .nav-link.active {
+            border: none;
+            border-bottom: 3px solid #007bff;
+            font-weight: 500;
+            color: #007bff;
+        }
+
+        /* Cards: softer shadows, rounded corners, minimal borders */
+        .custom-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .custom-card-header {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .custom-card-footer {
+            border-top: none;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        .custom-card .list-group-item {
+            border: none;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* Sidebar Quick Links hover effect */
+        .list-group-item-action:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Make icons slightly larger for a modern feel */
+        .mr-2 {
+            margin-right: 0.5rem !important;
+            font-size: 1.25rem;
+        }
+
+        /* Make background of section headers slightly darker */
+        .custom-card-header.bg-light {
+            background-color:#eeeeee !important;
+        }
+    </style>
+
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <!-- Left Column: Main Dashboard Content -->
+            <div class="col-lg-9">
+                <!-- Top navigation tabs (optional) -->
+                <ul class="nav nav-tabs mb-3">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'admin_dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_patients' %}">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_appointments' %}">Appointments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_reports' %}">Reports</a>
+                    </li>
+                </ul>
+
+
+                <!-- Row with Two Cards for Stats -->
+                <div class="row">
+                    <!-- Total Patients Card -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card custom-card h-100">
+                            <div class="card-header custom-card-header bg-success text-white">
+                                <i class="fas fa-users mr-2"></i>Total Patients
+                            </div>
+                            <div class="card-body">
+                                {% if total_patients %}
+                                    <h3 class="text-center">{{ total_patients }}</h3>
+                                    <p class="text-center">Patients Registered</p>
+                                {% else %}
+                                    <p class="text-center">No patient data available.</p>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer custom-card-footer text-right">
+                                <a href="{% url 'admin_patients' %}" class="btn btn-sm btn-outline-success">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Doctors Card -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card custom-card h-100">
+                            <div class="card-header custom-card-header bg-info text-white">
+                                <i class="fas fa-user-md mr-2"></i>Total Doctors
+                            </div>
+                            <div class="card-body">
+                                {% if total_doctors %}
+                                    <h3 class="text-center">{{ total_doctors }}</h3>
+                                    <p class="text-center">Doctors Registered</p>
+                                {% else %}
+                                    <p class="text-center">No doctor data available.</p>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer custom-card-footer text-right">
+                                <a href="{% url 'admin_doctors' %}" class="btn btn-sm btn-outline-info">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row with Two More Cards -->
+                <div class="row">
+                    <!-- Upcoming Appointments Card -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card custom-card h-100">
+                            <div class="card-header custom-card-header bg-primary text-white">
+                                <i class="fas fa-calendar-check mr-2"></i>Upcoming Appointments
+                            </div>
+                            <div class="card-body">
+                                {% if upcoming_appointments %}
+                                    <ul class="list-group list-group-flush">
+                                        {% for appointment in upcoming_appointments %}
+                                            <li class="list-group-item">
+                                                <strong>{{ appointment.appointment_date|date:"M d, Y H:i" }}</strong><br>
+                                                Patient: {{ appointment.patient.user.first_name }} {{ appointment.patient.user.last_name }}<br>
+                                                Doctor: {{ appointment.medical_professional.user.first_name }} {{ appointment.medical_professional.user.last_name }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p>No upcoming appointments.</p>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer custom-card-footer text-right">
+                                <a href="{% url 'admin_appointments' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reports Card -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card custom-card h-100">
+                            <div class="card-header custom-card-header bg-warning text-white">
+                                <i class="fas fa-chart-bar mr-2"></i>Reports
+                            </div>
+                            <div class="card-body">
+                                {% if reports %}
+                                    <ul class="list-group list-group-flush">
+                                        {% for report in reports %}
+                                            <li class="list-group-item">
+                                                <strong>{{ report.title }}</strong><br>
+                                                {{ report.summary }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p>No reports available.</p>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer custom-card-footer text-right">
+                                <a href="{% url 'admin_reports' %}" class="btn btn-sm btn-outline-warning">View All</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Sidebar with Quick Links and Notes -->
+            <div class="col-lg-3">
+                <!-- Quick Links Card -->
+                <div class="card custom-card mb-3">
+                    <div class="card-header custom-card-header bg-light">
+                        <strong>Quick Links</strong>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'admin_new_patient' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-plus text-info mr-2"></i>Add New Patient
+                        </a>
+                        <a href="{% url 'admin_new_doctor' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-md text-success mr-2"></i>Add New Doctor
+                        </a>
+                        <a href="{% url 'admin_new_appointment' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-calendar-plus text-primary mr-2"></i>Schedule Appointment
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Notes Card -->
+                <div class="card custom-card mb-3">
+                    <div class="card-header custom-card-header bg-light">
+                        <strong>Notes</strong>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            <strong>System Status:</strong> All systems operational.
+                        </p>
+                        <p>
+                            <strong>Alerts:</strong> Pending approvals require attention.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+    <style>
+        /* Add any custom styling similar to your other dashboard pages */
+        .form-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+    </style>
+
+    <div class="container">
+        <h2>Create New Appointment</h2>
+        <div class="form-container">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Create Appointment</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
